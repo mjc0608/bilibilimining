@@ -18,7 +18,7 @@ basePath = '/home/howie/DataMining/txt'
 dictPath = '/home/howie/DataMining/dict.txt'
 resultPath = '/home/howie/DataMining/res/'
 modelPath = 'word2vector.model'
-k = 20
+k = 4
 
 class TextLoader(object):
     def __init__(self):
@@ -47,8 +47,7 @@ def cut():
 			seg_list = jieba.cut(line)
 			output.write(" ".join(seg_list).encode('utf-8'))
 		f.close()
-		output.close()
-		return
+	output.close()
 
 def generateModel():
 	sentences = TextLoader()
@@ -85,7 +84,6 @@ def dist(a, b):
 
 def kmeans():
 	sentences = sentence2vector()
-	# sentences = np.array([(2,10),(2,5),(8,4),(5,8),(7,5),(6,4),(1,2),(4,9)])
 	# initial k center points
 	center = []
 	identical = []
@@ -94,10 +92,6 @@ def kmeans():
 		if c not in identical:
 			identical.append(c)
 			center.append(copy.deepcopy(sentences[c]))
-	# center.append(copy.deepcopy(sentences[0]))
-	# center.append(copy.deepcopy(sentences[3]))
-	# center.append(copy.deepcopy(sentences[6]))
-	# initial node marks
 	mark = []
 	for i in range(0, len(sentences)):
 		mark.append(0)
@@ -152,7 +146,6 @@ def classify():
 			cnt += 1
 		f.close()
 		output.close()
-		break
 	for i in range(0, k):
 		category[i].close()
 	print('results are stored in /res')
