@@ -44,7 +44,7 @@ public class RelatedEpisode {
 
         Scanner fileScanner;
         try {
-            fileScanner = new Scanner(new File("output/result"));
+            fileScanner = new Scanner(new File("data/result"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return;
