@@ -4,10 +4,7 @@ import us.codecraft.webmagic.ResultItems;
 import us.codecraft.webmagic.Task;
 import us.codecraft.webmagic.pipeline.FilePipeline;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -24,20 +21,21 @@ public class BilibiliPipeline extends FilePipeline{
 
         if (!resultItems.getRequest().getUrl()
                 .matches("(http://bangumi\\.bilibili\\.com/web_api/episode/\\w+\\.json)")) {
-            System.out.println("not saving " + resultItems.getRequest().getUrl());
             return;
         }
 
         try {
-            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(this.getFile(path + DigestUtils.md5Hex(resultItems.getRequest().getUrl()) + ".html")), "UTF-8"));
+//            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(this.getFile(path + "1.html")), "UTF-8"));
+            PrintWriter printWriter = new PrintWriter(new FileWriter(new File(path + resultItems.getAll().get("seasonId").toString()), true));
 
             Iterator vars = resultItems.getAll().entrySet().iterator();
             while(vars.hasNext()) {
                 Map.Entry<String, Object> entry = (Map.Entry)vars.next();
-                json.accumulate(entry.getKey(), entry.getValue());
+//                json.accumulate(entry.getKey(), entry.getValue());
+                printWriter.print(entry.getValue() + " ");
             }
 
-            printWriter.println(json.toString());
+            printWriter.println("");
             printWriter.close();
 
         } catch (IOException e) {

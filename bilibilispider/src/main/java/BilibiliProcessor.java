@@ -30,8 +30,7 @@ public class BilibiliProcessor implements PageProcessor {
 
     public void process(Page page) {
         if (firstTime) {
-            for (Integer i = 3287; i < 3290; i++) {
-                System.out.println("adding " + i.toString());
+            for (Integer i = 0; i < 1000; i++) {
                 page.addTargetRequest("http://bangumi.bilibili.com/jsonp/seasoninfo/" + i.toString() + ".ver");
             }
             firstTime = false;
@@ -47,16 +46,16 @@ public class BilibiliProcessor implements PageProcessor {
                 return;
             }
             String jsonText = rawText.substring("seasonListCallback(".length(), rawText.length() - 2);
-            System.out.println(jsonText);
+//            System.out.println(jsonText);
             JSONObject json = JSONObject.fromObject(jsonText);
-            System.out.println("json:" + json.toString());
+//            System.out.println("json:" + json.toString());
 
             JSONArray episodes = JSONArray.fromObject(
                     JSONObject.fromObject(
                             json.get("result")
                     ).get("episodes")
             );
-            System.out.println("episodes: " + episodes.toString());
+//            System.out.println("episodes: " + episodes.toString());
 
             for (int i = 0; i < episodes.size(); i++) {
                 JSONObject avInfo = JSONObject.fromObject(episodes.get(i));
@@ -82,9 +81,11 @@ public class BilibiliProcessor implements PageProcessor {
                     ).get("currentEpisode")
             );
 
+//            System.out.println("VideoMetaPage: " + currentEpisode.toString());
+
             page.putField("seasonId", currentEpisode.get("seasonId").toString());
-            page.putField("episodeId", currentEpisode.get("episodeId").toString());
-            page.putField("longTitle", currentEpisode.get("longTitle").toString());
+            page.putField("index", currentEpisode.get("index").toString());
+//            page.putField("longTitle", currentEpisode.get("longTitle").toString());
             page.putField("cmtUrl", "http://comment.bilibili.com/" + currentEpisode.get("danmaku").toString() + ".xml");
 
             return;
@@ -107,7 +108,7 @@ public class BilibiliProcessor implements PageProcessor {
         Spider.create(new BilibiliProcessor())
                 .addPipeline(new BilibiliPipeline("output/"))
                 .addUrl("http://www.bilibili.com")
-                .thread(1)
+                .thread(4)
                 .run();
     }
 }
