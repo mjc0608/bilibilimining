@@ -6,11 +6,14 @@ import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.pipeline.FilePipeline;
 import us.codecraft.webmagic.processor.PageProcessor;
 
+import java.util.HashMap;
+
 public class BilibiliProcessor implements PageProcessor {
 
     private Site site = Site.me().setRetryTimes(3).setSleepTime(100).setTimeOut(3000);
 
     private static boolean firstTime;
+    private static HashMap<Integer, String> seasonIdToName;
 
     public static boolean isMetaPage(String url) {
         return url.matches("(http://bangumi\\.bilibili\\.com/jsonp/seasoninfo/\\w+\\.ver)");
@@ -30,7 +33,7 @@ public class BilibiliProcessor implements PageProcessor {
 
     public void process(Page page) {
         if (firstTime) {
-            for (Integer i = 0; i < 1000; i++) {
+            for (Integer i = 0; i < 2000; i++) {
                 page.addTargetRequest("http://bangumi.bilibili.com/jsonp/seasoninfo/" + i.toString() + ".ver");
             }
             firstTime = false;
@@ -56,6 +59,13 @@ public class BilibiliProcessor implements PageProcessor {
                     ).get("episodes")
             );
 //            System.out.println("episodes: " + episodes.toString());
+
+            seasonIdToName.put(
+                    Integer.parseInt(url.substring("http://bangumi.bilibili.com/jsonp/seasoninfo/".length(),url.indexOf(".ver"))),
+                    JSONObject.fromObject(
+                        json.get("result")
+                    ).get("bangumi_title").toString()
+            );
 
             for (int i = 0; i < episodes.size(); i++) {
                 JSONObject avInfo = JSONObject.fromObject(episodes.get(i));
@@ -87,7 +97,7 @@ public class BilibiliProcessor implements PageProcessor {
             page.putField("index", currentEpisode.get("index").toString());
 //            page.putField("longTitle", currentEpisode.get("longTitle").toString());
             page.putField("cmtUrl", "http://comment.bilibili.com/" + currentEpisode.get("danmaku").toString() + ".xml");
-
+            page.putField("name", seasonIdToName.get(Integer.parseInt(currentEpisode.get("seasonId").toString())));
             return;
         }
 
@@ -105,6 +115,7 @@ public class BilibiliProcessor implements PageProcessor {
 
     public static void main(String[] args) {
         firstTime = true;
+        seasonIdToName = new HashMap<Integer, String>();
         Spider.create(new BilibiliProcessor())
                 .addPipeline(new BilibiliPipeline("output/"))
                 .addUrl("http://www.bilibili.com")
